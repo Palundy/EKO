@@ -1,6 +1,7 @@
 import serial
+
 import time
-from TMCL import *
+from TMCL import TMCL
 
 port = "COM3"
 baud_rate = 9600
@@ -40,6 +41,16 @@ try:
         )
 
 
+        # Command for searching for home switch in positive direction,
+        # then reversing direction when right stop switch is reached.
+        homeCmd = TMCL.generateCommand(
+            TMCL.COMMAND_REFERENCE_SEARCH,
+            6,
+            0
+        )
+
+
+
 
         # Retrieve the starting position of the axis
         startingPos = None
@@ -52,34 +63,29 @@ try:
 
 
         # Turn clockwise
-        intermediatePos = startingPos
-        s.write(cwCmd)
-        sReply = s.readline()
+        # intermediatePos = startingPos
+        # s.write(cwCmd)
+        # sReply = s.readline()
         
-        if sReply:
-            # Wait until the position of the motor is valid
-            while abs(intermediatePos - startingPos) < abs(cwSteps):
-                # Retrieve the position of the axis
-                print("In loop")
-                s.write(posCmd)
-                sReply = s.readline()
-                intermediatePos = TMCL.returnReplyValue(sReply)
-            print("Succesfully turned 180° clockwise")
+        # if sReply:
+        #     # Wait until the position of the motor is valid
+        #     while abs(intermediatePos - startingPos) < abs(cwSteps):
+        #         # Retrieve the position of the axis
+        #         print("In loop")
+        #         s.write(posCmd)
+        #         sReply = s.readline()
+        #         intermediatePos = TMCL.returnReplyValue(sReply)
+        #     print("Succesfully turned 180° clockwise")
 
         
         # Turn counter-clockwise
-        endPos = intermediatePos
-        s.write(ccwCmd)
+        s.write(homeCmd)
+        print("Searching for home")
         sReply = s.readline()
         if sReply:
-            # Wait until the position of the motor is valid
-            while abs(endPos - intermediatePos) < abs(ccwSteps):
-                # Retrieve the position of the axis
-                print("In loop")
-                s.write(posCmd)
+            while True:
+                print(TMCL.returnReplyValue(sReply))
                 sReply = s.readline()
-                endPos = TMCL.returnReplyValue(sReply)
-            print("Succesfully turned 180° counter-clockwise")
     
 except serial.SerialException as e:
     print(f"Error opening serial port: {e}")

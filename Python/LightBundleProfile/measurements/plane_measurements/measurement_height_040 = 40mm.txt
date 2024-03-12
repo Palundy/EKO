@@ -1,0 +1,7 @@
+measurement_height_040 = 4.0cm
+granularity = 2.0cm
+offset-x = 12cm
+offset-y = 5.5cm
+
+extra-offset-x = 4.5cm
+This is because of the width of the pyranometer. 
