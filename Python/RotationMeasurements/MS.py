@@ -188,9 +188,9 @@ class MS:
         # Check whether 0.2s has passed since the last reading of the sensor
         if self.time_last_read != None:
             time_elapsed = time.time() - self.time_last_read
-            if (time_elapsed < 0.20):
+            if (time_elapsed < 0.15):
                 # Sleep for the remaining time
-                time.sleep(0.20 - time_elapsed)
+                time.sleep(0.15 - time_elapsed)
 
         # Read out the sensor
         try:
@@ -199,10 +199,9 @@ class MS:
                 sensor_value = self.sensor.read_float(register_address, 3, register_specification["register_amount"])
 
         except Exception as e:
-            print(e)
             # Failed to read out the sensor
-            # Returning None (NaN)
-            return None
+            #       call this function again
+            return self.read_sensor(register_address)
         
         # Record the current time
         self.time_last_read = time.time()

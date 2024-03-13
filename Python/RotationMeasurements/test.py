@@ -1,9 +1,8 @@
 from MS import MS
-from S_Series import S_Series as S
-import matplotlib.pyplot as plt
 import numpy as np
 import time
 from TMCL import TMCL
+from tabulate import tabulate
 
 # Initialize connection with motor
 motor = TMCL("COM3")
@@ -25,8 +24,8 @@ used_addresses.append(test_sensor.modbus_address)
 
 
 # Set the amount of measurements
-amount_of_measurements = 25
-waiting_time = 15
+amount_of_measurements = 50
+waiting_time = 45
 
 # Lock the starting position at 1280000
 # motor.set_actual_position(1280000)
@@ -39,8 +38,8 @@ begin_pos = motor.actual_position()
 half = TMCL.HALF_ROTATION * TMCL.GEAR_RATIO
 quarter = TMCL.QUARTER_ROTATION * TMCL.GEAR_RATIO
 
-# Create the array with steps and irradiances
-steps = np.array([quarter, -half, half, -quarter])
+# Create the array with steps and irradiance data
+steps = np.array([quarter, -half, half, -half, quarter])
 irr = np.full((len(steps) - 1, 2, amount_of_measurements), 0)
 
 for i in range(len(steps)):
@@ -52,6 +51,7 @@ for i in range(len(steps)):
 
     # Check whether measurements should be taken this cycle
     if i == len(steps) - 1:
+        print("Reached home position!")
         continue
 
     # Wait for the sensors to adjust to the environment
@@ -79,19 +79,11 @@ print(f"Beginning position was: {begin_pos}, and the final position is: {end_pos
 
 
 
-# Calculate the standard deviation and mean of each measurement series
-for i in range(len(irr)):
-    
-    # Mean
-    mean_ref = np.mean(irr[i][0])
-    mean_test = np.mean(irr[i][1])
-
-    # Standard deviation
-    std_ref = np.std(irr[i][0])
-    std_test = np.std(irr[i][1])
-
-    print("")
-    print(f"Measurement {i+1}: REFERENCE: Mean: {mean_ref}, Sigma: {std_ref}")
-    print(f"Measurement {i+1}: TEST: Mean: {mean_test}, Sigma: {std_test}")
-
+print(tabulate(
+    [
+        [1, np.mean(irr[0][0]), np.mean(irr[1][1]), np.std(irr[0][0]), np.std(irr[1][1]), np.mean(irr[2][0]), np.mean(irr[3][1]), np.std(irr[2][0]), np.std(irr[3][1])],
+        [2, np.mean(irr[1][0]), np.mean(irr[0][1]), np.std(irr[1][0]), np.std(irr[0][1]), np.mean(irr[3][0]), np.mean(irr[2][1]), np.std(irr[3][0]), np.std(irr[2][1])]
+    ],
+    headers = ["Position", "Mean REF:1", "Mean TEST:1", "STD REF:1", "STD TEST:1", "Mean REF:2", "Mean TEST:2", "STD REF:2", "STD TEST:2"]
+))
 
