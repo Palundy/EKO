@@ -27,21 +27,22 @@ overwrite = False
 overwrite_steps = 0
 overwrite_steps_amount = 1
 
-step_size = int(TMCL.FULL_ROTATION * TMCL.GEAR_RATIO / 4000)
+step_size = int(TMCL.FULL_ROTATION * TMCL.GEAR_RATIO * TMCL.CLOCKWISE / 32)
 
 
 # Open the .csv file
-filename = f"measurement_scan_7.csv"
+timenow = int(time.time())  
+filename = f"measurement_quick_scan_{timenow}.csv"
 
-with open(filename, "w", newline="") as file:
-    writer = csv.writer(file)        
+with open(filename, "w+", newline="") as file:
+    writer = csv.writer(file)
     
 
     
     # Connect with the driver
     with serial.Serial("COM3", baudrate=9600, timeout=1) as s:
 
-        while (abs(n_steps) <= abs(TMCL.FULL_ROTATION * TMCL.GEAR_RATIO) and overwrite == False) or (overwrite and overwrite_steps <= overwrite_steps_amount):
+        while (abs(n_steps) < abs(TMCL.FULL_ROTATION * TMCL.GEAR_RATIO) and overwrite == False) or (overwrite and overwrite_steps <= overwrite_steps_amount):
             
 
 
@@ -55,7 +56,7 @@ with open(filename, "w", newline="") as file:
                 TMCL.AXIS_PARAMETER_ACTUAL_POSITION
             )
             s.write(posCmd)
-            time.sleep(0.07)
+            time.sleep(.5)
 
             pos = TMCL.returnReplyValue(s.readline())
             this_time = time.time()
@@ -92,6 +93,13 @@ with open(filename, "w", newline="") as file:
                 except Exception as e:
                     continue
                 
-
-
+        time.sleep(2)
+        # Reset to begin position
+        stepCmd = TMCL.generateCommand(
+            TMCL.COMMAND_MOVE_TO_POSITION,
+            TMCL.FULL_ROTATION * TMCL.GEAR_RATIO * TMCL.COUNTER_CLOCKWISE,
+            TMCL.TYPE_RELATIVE
+        )
+        s.write(stepCmd)
+    
     file.flush()

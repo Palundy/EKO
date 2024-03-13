@@ -1,4 +1,4 @@
-csv = readtable("measurements\measurement_scan_4.csv");
+csv = readtable("measurements/measurement_quick_scan_23.csv");
 
 pos_abs = csv{:, 1};
 pos_rel = csv{:, 2};
@@ -7,7 +7,7 @@ I = csv{:, 3};
 
 % Convert the relative rotation to angle in radians
 FULL_ROTATION = 51200 * -5;
-angles = (pos_rel / FULL_ROTATION) * 2 * pi;
+angles = (pos_rel / FULL_ROTATION) * -2 * pi;
 
 
 % Map the radial points
@@ -64,7 +64,11 @@ figure;
 scatter3(x, y, I);
 hold on;
 scatter3(o_x, o_y, o_I);
+hold on;
+scatter3(x(1), y(1), I(1), 'x');
+hold on
+scatter3(x(end), y(end), I(end), 'square');
 hold off;
 
-figure;
-scatter3(x, y, deriv_ratio);
+%figure;
+%scatter3(x, y, deriv_ratio);

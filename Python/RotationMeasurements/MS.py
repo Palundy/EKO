@@ -49,8 +49,7 @@ class MS:
                 This list can be seen as a blacklist.
                 The parameter defaults to an empty blacklist.
         """
-
-        print("")
+        
         if modbus_address == -1:
             print("Search for modbus address is initiated.")
 
@@ -189,9 +188,9 @@ class MS:
         # Check whether 0.2s has passed since the last reading of the sensor
         if self.time_last_read != None:
             time_elapsed = time.time() - self.time_last_read
-            if (time_elapsed < 0.2):
+            if (time_elapsed < 0.1):
                 # Sleep for the remaining time
-                time.sleep(0.2 - time_elapsed)
+                time.sleep(0.1 - time_elapsed)
 
         # Read out the sensor
         try:
