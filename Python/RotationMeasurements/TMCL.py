@@ -291,6 +291,27 @@ class TMCL:
         return None
     
 
+    def set_actual_position(self, position: int):
+        """
+        Wrapper function to send the command
+        to set the actual position.
+
+        Args:
+            position (int): The actual position.
+
+        Returns:
+            Self@TMCL: This instance of the TMCL class.
+        """
+
+        # Send the command to move the
+        # position to the given absolute position
+        return self.send_command(
+            TMCL.COMMAND_SET_AXIS_PARAMETER,
+            position,
+            TMCL.AXIS_PARAMETER_ACTUAL_POSITION
+        )
+    
+
     def is_moving(self, begin_pos, step_amount):
         """
         Function to check whether the motor

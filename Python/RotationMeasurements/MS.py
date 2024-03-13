@@ -49,7 +49,7 @@ class MS:
                 This list can be seen as a blacklist.
                 The parameter defaults to an empty blacklist.
         """
-        
+
         if modbus_address == -1:
             print("Search for modbus address is initiated.")
 
@@ -60,7 +60,7 @@ class MS:
                     # Try to connect with the sensor
                     modbus_address += 1
                     print(modbus_address)
-                    time.sleep(0.3)
+                    time.sleep(0.1)
 
                     if modbus_address in used_addresses:
                         print(f"The current address ({modbus_address}) is already in use. Skipping this search iteration.")
@@ -188,14 +188,18 @@ class MS:
         # Check whether 0.2s has passed since the last reading of the sensor
         if self.time_last_read != None:
             time_elapsed = time.time() - self.time_last_read
-            if (time_elapsed < 0.1):
+            if (time_elapsed < 0.20):
                 # Sleep for the remaining time
-                time.sleep(0.1 - time_elapsed)
+                time.sleep(0.20 - time_elapsed)
 
         # Read out the sensor
         try:
-            sensor_value = self.sensor.read_float(register_address, 3, register_specification["register_amount"])
+            sensor_value = None
+            while sensor_value == None:
+                sensor_value = self.sensor.read_float(register_address, 3, register_specification["register_amount"])
+
         except Exception as e:
+            print(e)
             # Failed to read out the sensor
             # Returning None (NaN)
             return None
