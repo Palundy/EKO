@@ -115,6 +115,8 @@ class MS:
 
         
 
+    
+    
     def output_voltage(self)-> float:
         """Returns the sensor output voltage in mV"""
         return self.read_sensor(S.ADDRESS_SENSOR_OUTPUT_VOLTAGE)
@@ -202,6 +204,7 @@ class MS:
             # Failed to read out the sensor
             #       call this function again
             return self.read_sensor(register_address)
+        
         
         # Record the current time
         self.time_last_read = time.time()

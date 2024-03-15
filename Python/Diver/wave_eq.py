@@ -33,8 +33,8 @@ def generate_raindrop(x_range, y_range):
 
 
 
-x_range = 500
-y_range = 500
+x_range = 250
+y_range = 250
 t_range = 650
 starting_condition = 1
 c_starting_condition = 0.65 # Speed constant
