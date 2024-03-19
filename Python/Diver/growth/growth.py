@@ -56,6 +56,10 @@ def explode_genome(genome):
     IBFB = convert_chromosome(genome[34:40]) / 64
     IBFL = convert_chromosome(genome[40:46]) / 64
 
+    IBFT = 0.0001 if IBFT == 0 else IBFT
+    IBFR = 0.0001 if IBFR == 0 else IBFR
+    IBFB = 0.0001 if IBFB == 0 else IBFB
+    IBFL = 0.0001 if IBFL == 0 else IBFL
 
     return [
         GT, GR, GB, GL,
@@ -63,14 +67,40 @@ def explode_genome(genome):
     ]
 
 def perform_action(genome):
-    GT, GR, GB, GL, IBFT, IBFR, IBFB, IBFL = explode_genome()
+    return
 
-def evaluate_organisms(organisms):
+def evaluate_organisms(organisms, cells, t):
     for x in range(x_range):
         for y in range(y_range):
-                for o in organisms:
-                    
+            organism = organisms[t][x][y]
+            organisms[t + 1][x][y] = organism
+            GT, GR, GB, GL, IBFT, IBFR, IBFB, IBFL = explode_genome(organisms[t][x][y])
 
+            # Calculate chance to grow TOP
+            if (GT / IBFT > random.random()):
+                # Grow TOP
+                if (y != y_range-1):
+                    organisms[t][x][y+1] = organism
+
+            # Calculate chance to grow RIGHT
+            if (GR / IBFR > 1):
+                # Grow RIGHT
+                if (x != x_range-1):
+                    organisms[t][x+1][y] = organism
+
+            # Calculate chance to grow BOTTOM
+            if (GB / IBFB > 1):
+                # Grow BOTTOM
+                if (y != 0):
+                    organisms[t][x][y-1] = organism
+
+            # Calculate chance to grow LEFT
+            if (GL / IBFL > 1):
+                # Grow LEFT
+                if (x != 0):
+                    organisms[t][x-1][y] = organism
+
+    return organisms, cells
 
 
 
@@ -92,7 +122,7 @@ reproduce_with_fit_chance = 0.5
 elitism = True
 # Whenever "Elitism" is enabled, all of the top organisms
 # get put into the next generation, after which the rest
-# population is filled with offspring
+# population is filled  with offspring
 random_crossover_point = True
 # Determines whether a random crossover point should be calculated
 # for every generation
@@ -108,7 +138,8 @@ last_value_within_margin = None
 
 
 # Create arrays
-organisms = np.zeros((x_range, y_range, 46))
+organisms = np.zeros((simulation_steps, x_range, y_range, 46))
+cells = np.zeros((simulation_steps, x_range, y_range))
 mean_fitness_scores = np.zeros(generation_amount)
 most_fit_organism = None
 most_fit_score = 0
@@ -119,8 +150,11 @@ fraction = 12
 spacing = (x_range * (fraction-2)/fraction) / (organism_amount)
 for i in range(organism_amount):
     # Spread the organisms around on the 'floor' of the grid
-    organisms[0][int(x_range/fraction + i*spacing + x_range/fraction)] = generate_genome()
-    
+    organisms[0][0][int(x_range/fraction + i*spacing + x_range/fraction)] = generate_genome()
+    cells[0][0][int(x_range/fraction + i*spacing + x_range/fraction)] = 1
+
+fig, ax = plt.subplots()
+im = ax.imshow(cells[0], cmap='viridis')
 
 
 # Iterate over all generation
@@ -130,11 +164,17 @@ for g in range(generation_amount):
     fitnesses = np.empty(organism_amount, float)
 
     # Run the whole simulation
-    for s in range(simulation_steps):
+    for t in range(simulation_steps - 1):
         # For each organism in the grid
         # the genome will be evaluated
         # then action will be taken
-        organisms = evaluate_organisms(organisms)
+        organisms, cells = evaluate_organisms(organisms, cells, t)
+
+        im.set_data(cells[t])
+        fig.canvas.draw_idle()
+        plt.show()
+
+    exit()
 
 
 
