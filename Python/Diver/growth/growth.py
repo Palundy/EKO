@@ -170,11 +170,10 @@ for g in range(generation_amount):
         # then action will be taken
         organisms, cells = evaluate_organisms(organisms, cells, t)
 
+        print("Update")
         im.set_data(cells[t])
         fig.canvas.draw_idle()
-        plt.show()
 
-    exit()
 
 
 

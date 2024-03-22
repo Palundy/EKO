@@ -39,6 +39,9 @@ for i = 1:length(I) - 1
 end
 o_deriv = derivatives(opt_irr_indices);
 
+polarplot(angles, I);
+figure;
+
 
 % Check which derivatives fall within 2sigma from the mean
 sigma = std(o_deriv);
