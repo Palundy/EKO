@@ -1,8 +1,11 @@
 from Classes.MS import MS
 from Classes.TMCL import TMCL
+from Classes.ICF02 import ICF02
 import numpy as np
 import time
 import csv
+
+from Classes.Series.MS80S import MS80S
 
 
 # Initialize connection with motor
@@ -10,21 +13,26 @@ motor = TMCL("COM3")
 
 # Initialize connection with the reference sensor
 used_addresses = []
-ref_sensor = MS("COM4", 3, used_addresses)
+ref_sensor = MS(MS80S ,"COM4", 3, used_addresses)
 while (ref_sensor.is_ready == False):
     time.sleep(1)
 used_addresses.append(ref_sensor.modbus_address)
 
-# Initialize connection with the test sensor
-test_sensor = MS("COM4", 2, used_addresses)
+# Initialize connection with the test sensorw
+test_sensor = MS(MS80S, "COM4", 2, used_addresses)
 while (test_sensor.is_ready == False):
     time.sleep(1)
 used_addresses.append(test_sensor.modbus_address)
 
 
+# print(motor.actual_speed())
+# print(motor.set_actual_speed(2047))
+# print(motor.actual_speed())
+# exit()
+
 
 # Set the amount of measurements
-amount_of_measurements = 50
+amount_of_measurements = 10
 
 
 # Open the .csv file
@@ -39,13 +47,16 @@ with open(filename, "w+", newline="") as file:
     begin_pos = motor.actual_position()
     print(f"Begin pos: {begin_pos}")
 
+    # Wiggle to ensure the curtains are hanging
+    motor.wiggle(TMCL.FULL_ROTATION / 7)
+
 
     # Calculate the step size
     half = TMCL.HALF_ROTATION * TMCL.GEAR_RATIO
     quarter = TMCL.QUARTER_ROTATION * TMCL.GEAR_RATIO
 
     # Create the array with steps and irradiance data
-    steps = np.array([0, quarter, -half, -quarter])
+    steps = np.array([0, quarter, -half, quarter])
     irr = np.full((len(steps) - 1, 2, amount_of_measurements), 0)
 
 
@@ -58,16 +69,22 @@ with open(filename, "w+", newline="") as file:
             print(f"Rotating: {step} microsteps")
             motor.relative_rotation(step)
 
-        # Check whether measurements should be taken this cycle
-        if i == len(steps) - 1:
-            print("Reached home position!")
-            continue
-
+        
         # Wait for the sensors to adjust to the environment
         #   specifically the reference sensor
+        ICF02.wait_until_irradiance_is_stable(ref_sensor)
 
         # Capture the current position
         current_pos = motor.actual_position()
+
+        if (i == len(steps) - 1):
+            # Then no measurements have to be taken
+            # because the end position has been reached
+            print("Home position has been reached.")
+
+            # Perform a final wiggle to ensure the sensors are shaded again
+            motor.wiggle(TMCL.FULL_ROTATION / 7)
+            continue
 
         # Start measuring
         print(f"Start taking the measurements")
@@ -95,7 +112,7 @@ with open(filename, "w+", newline="") as file:
             ]
             writer.writerow(data)
             file.flush()
-        
+
 
     # Flush the file once more
     file.flush()

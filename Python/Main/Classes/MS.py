@@ -1,6 +1,8 @@
-from Series import *
+from .Series import *
+
 import minimalmodbus
 import time
+import numpy as np
 
 class MS:
     """
@@ -207,8 +209,8 @@ class MS:
             sensor_value = self.sensor.read_float(register_address, 3, register_specification["register_amount"])
         except Exception as e:
             # Failed to read out the sensor
-            # Returning None (NaN)
-            return None
+            # Re-executing this function
+            return self.read_sensor(register_address)
         
         # Record the current time
         self.time_last_read = time.time()
@@ -217,4 +219,8 @@ class MS:
             # Parse and then return as an integer
             return int(sensor_value)
         return sensor_value
+    
+
+    
+
 
